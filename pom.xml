@@ -67,6 +67,26 @@
         </plugins>
     </build>
 
+    <developers>
+        <developer>
+            <id>leiko</id>
+            <name>Maxime Tricoire</name>
+            <email>max.tricoire@gmail.com</email>
+            <roles>
+                <role>admin</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+            <organizationUrl>http://github.com/maxleiko</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:BraindeadCrew/java-websocket-client.git</connection>
+        <developerConnection>scm:git:git@github.com:BraindeadCrew/java-websocket-client.git</developerConnection>
+        <url>http://github.com/BraindeadCrew/java-websocket-client.git</url>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>sonatype-nexus-staging</id>
