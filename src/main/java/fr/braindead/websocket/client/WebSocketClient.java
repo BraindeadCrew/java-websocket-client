@@ -19,9 +19,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      *
      * @param uri web socket server uri
      * @throws IOException
-     * @throws InterruptedException
      */
-    public WebSocketClient(URI uri) throws IOException, InterruptedException {
+    public WebSocketClient(URI uri) throws IOException {
         Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
         XnioWorker worker = xnio.createWorker(OptionMap.builder()
                 .set(Options.WORKER_IO_THREADS, 2)
@@ -43,9 +42,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      * @param worker XnioWorker
      * @param uri web socket server uri
      * @throws IOException
-     * @throws InterruptedException
      */
-    public WebSocketClient(XnioWorker worker, URI uri) throws IOException, InterruptedException {
+    public WebSocketClient(XnioWorker worker, URI uri) throws IOException {
         ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
         IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
                 .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
@@ -58,9 +56,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      * @param buffer ByteBufferSlicePool
      * @param uri web socket server uri
      * @throws IOException
-     * @throws InterruptedException
      */
-    public WebSocketClient(XnioWorker worker, ByteBufferSlicePool buffer, URI uri) throws IOException, InterruptedException {
+    public WebSocketClient(XnioWorker worker, ByteBufferSlicePool buffer, URI uri) throws IOException {
         IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
                 .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
         futureClient.addNotifier(futureNotifier, null);
@@ -82,6 +79,25 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      */
     public boolean isOpen() {
         return this.channel != null && this.channel.isOpen();
+    }
+
+    /**
+     *
+     * @param text message to send to server
+     */
+    public void send(String text) {
+        this.send(text, null);
+    }
+
+    /**
+     *
+     * @param text
+     * @param callback called once processed
+     */
+    public void send(String text, WebSocketCallback<Void> callback) {
+        if (this.channel != null && this.channel.isOpen()) {
+            WebSockets.sendText(text, this.channel, callback);
+        }
     }
 
     /**
