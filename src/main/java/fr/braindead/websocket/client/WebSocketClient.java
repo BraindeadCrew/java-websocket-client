@@ -21,8 +21,7 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      * @throws IOException
      */
     public WebSocketClient(URI uri) throws IOException {
-        Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
-        XnioWorker worker = xnio.createWorker(OptionMap.builder()
+        XnioWorker worker = Xnio.getInstance().createWorker(OptionMap.builder()
                 .set(Options.WORKER_IO_THREADS, 2)
                 .set(Options.CONNECTION_HIGH_WATER, 1000000)
                 .set(Options.CONNECTION_LOW_WATER, 1000000)
