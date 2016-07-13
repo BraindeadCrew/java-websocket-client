@@ -1,5 +1,7 @@
 package fr.braindead.websocket.client;
 
+import io.undertow.connector.ByteBufferPool;
+import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.core.*;
 import org.xnio.*;
 
@@ -30,9 +32,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
                 .set(Options.TCP_NODELAY, true)
                 .set(Options.CORK, true)
                 .getMap());
-        ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
-        IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+        ByteBufferPool bufferPool = new DefaultByteBufferPool(true, 1024);
+		IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient.connectionBuilder(worker, bufferPool, uri).connect();
         futureClient.addNotifier(futureNotifier, null);
     }
 
@@ -43,9 +44,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      * @throws IOException
      */
     public WebSocketClient(XnioWorker worker, URI uri) throws IOException {
-        ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
-        IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+        ByteBufferPool bufferPool = new DefaultByteBufferPool(true, 1024);
+		IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient.connectionBuilder(worker, bufferPool, uri).connect();
         futureClient.addNotifier(futureNotifier, null);
     }
 
@@ -57,8 +57,8 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      * @throws IOException
      */
     public WebSocketClient(XnioWorker worker, ByteBufferSlicePool buffer, URI uri) throws IOException {
-        IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+    	ByteBufferPool bufferPool = new DefaultByteBufferPool(true, 1024);
+		IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient.connectionBuilder(worker, bufferPool, uri).connect();
         futureClient.addNotifier(futureNotifier, null);
     }
 
