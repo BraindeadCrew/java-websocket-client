@@ -1,10 +1,16 @@
 package fr.braindead.websocket.client;
 
+import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.websockets.core.*;
 import org.xnio.*;
+import org.xnio.ssl.JsseXnioSsl;
+import org.xnio.ssl.XnioSsl;
 
 import java.io.IOException;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * Created by leiko on 27/02/15.
@@ -32,7 +38,7 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
                 .getMap());
         ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
         IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+                .connect(worker, getSSL(), buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
         futureClient.addNotifier(futureNotifier, null);
     }
 
@@ -45,7 +51,7 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
     public WebSocketClient(XnioWorker worker, URI uri) throws IOException {
         ByteBufferSlicePool buffer = new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024);
         IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+                .connect(worker, getSSL(), buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
         futureClient.addNotifier(futureNotifier, null);
     }
 
@@ -58,8 +64,24 @@ public abstract class WebSocketClient implements WebSocketClientHandlers {
      */
     public WebSocketClient(XnioWorker worker, ByteBufferSlicePool buffer, URI uri) throws IOException {
         IoFuture<WebSocketChannel> futureClient = io.undertow.websockets.client.WebSocketClient
-                .connect(worker, buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
+                .connect(worker, getSSL(), buffer, OptionMap.EMPTY, uri, WebSocketVersion.V13);
         futureClient.addNotifier(futureNotifier, null);
+    }
+
+    /**
+     * Try to get a XnioSsl provider to secure websocket connection 
+     * @return a XnioSsl provider if exist and creatable, otherwise returns null
+     */
+    private static XnioSsl getSSL() {
+        try {
+            return new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | KeyManagementException ignored) {
+            try {
+                return new JsseXnioSsl(Xnio.getInstance(), OptionMap.EMPTY);
+            } catch (NoSuchProviderException | NoSuchAlgorithmException | KeyManagementException ignored2) {
+            }
+        }
+        return null;
     }
 
     /**
